@@ -155,6 +155,128 @@
     border-radius: 6px; border: 1px solid var(--border); font-size: 12px;
     color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; text-align: center;
   }
+
+  /* ── Architecture Diagram ── */
+  .arch-diagram {
+    display: flex; justify-content: center; padding: 4px 0;
+  }
+  .arch-flow {
+    display: flex; flex-direction: column; align-items: center; width: 100%;
+  }
+  .arch-arrow { display: flex; justify-content: center; margin: 2px 0; }
+  .arch-inner-arrow { display: flex; justify-content: center; margin: 4px 0; }
+
+  .arch-node {
+    width: 100%; max-width: 520px; padding: 12px 18px; border-radius: 8px;
+    text-align: center; position: relative;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .arch-node-label {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 2px;
+    color: var(--text-dim); margin-bottom: 2px;
+  }
+  .arch-node-title { font-size: 14px; font-weight: 700; color: var(--text-bright); }
+  .arch-node-detail { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+  .arch-node-shape {
+    display: inline-block; font-size: 10px; color: var(--cyan); opacity: 0.8;
+    background: rgba(57,210,192,0.07); padding: 1px 6px; border-radius: 3px; margin-top: 4px;
+  }
+  .arch-node-icon {
+    position: absolute; top: 8px; left: 12px; font-size: 10px;
+    color: var(--accent); opacity: 0.6; font-weight: 600;
+  }
+
+  .arch-input {
+    background: linear-gradient(135deg, rgba(88,166,255,0.1), rgba(88,166,255,0.04));
+    border: 1px solid rgba(88,166,255,0.2);
+  }
+  .arch-embed {
+    background: linear-gradient(135deg, rgba(188,140,255,0.08), rgba(188,140,255,0.03));
+    border: 1px solid rgba(188,140,255,0.18);
+  }
+  .arch-result {
+    background: linear-gradient(135deg, rgba(63,185,80,0.1), rgba(63,185,80,0.04));
+    border: 1px solid rgba(63,185,80,0.2);
+  }
+
+  .arch-layer-wrap {
+    width: 100%; max-width: 560px; position: relative;
+  }
+  .arch-layer-badge {
+    position: absolute; top: -9px; right: 16px; z-index: 2;
+    font-size: 10px; font-weight: 700; font-family: 'IBM Plex Mono', monospace;
+    color: var(--orange); background: var(--surface);
+    padding: 1px 10px; border-radius: 4px;
+    border: 1px solid rgba(210,153,34,0.3);
+  }
+  .arch-layer {
+    border: 1.5px solid rgba(210,153,34,0.25); border-radius: 10px;
+    padding: 18px 14px 14px; background: rgba(210,153,34,0.02);
+  }
+
+  .arch-sublayer { margin-bottom: 2px; }
+  .arch-sublayer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .arch-sublayer-tag {
+    font-size: 11px; font-weight: 700; font-family: 'IBM Plex Mono', monospace;
+    padding: 2px 10px; border-radius: 4px;
+  }
+  .attn-tag {
+    color: var(--accent); background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.15);
+  }
+  .ffn-tag {
+    color: var(--green); background: rgba(63,185,80,0.1);
+    border: 1px solid rgba(63,185,80,0.15);
+  }
+  .arch-residual-badge {
+    font-size: 10px; color: var(--text-dim); font-family: 'IBM Plex Mono', monospace;
+    padding: 1px 8px; border-radius: 3px; border: 1px dashed var(--border);
+  }
+
+  .arch-step-grid { display: flex; flex-direction: column; gap: 3px; }
+  .arch-step {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 4px 10px; border-radius: 5px;
+    background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .arch-step:hover { background: rgba(255,255,255,0.04); border-color: var(--border-hi); }
+  .arch-step-ref {
+    font-size: 9px; color: var(--accent); opacity: 0.5; font-weight: 600; min-width: 16px;
+  }
+  .arch-step-name { font-size: 12px; color: var(--text-bright); font-weight: 600; }
+  .arch-step-info { font-size: 10.5px; color: var(--text-dim); margin-left: auto; }
+
+  .arch-output-stack { max-width: 560px; width: 100%; padding: 0; }
+  .arch-output-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; flex-wrap: wrap;
+  }
+  .arch-output-arr { color: var(--text-dim); font-size: 16px; }
+  .arch-mini-node {
+    padding: 8px 14px; border-radius: 6px; text-align: center;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    font-weight: 600; color: var(--text-bright);
+  }
+  .norm-node {
+    background: rgba(188,140,255,0.07); border: 1px solid rgba(188,140,255,0.18);
+  }
+  .head-node {
+    background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18);
+  }
+  .sample-node {
+    background: rgba(57,210,192,0.07); border: 1px solid rgba(57,210,192,0.18);
+  }
+
+  @media (max-width: 600px) {
+    .arch-output-row { flex-direction: column; }
+    .arch-output-arr { transform: rotate(90deg); }
+    .arch-step-info { margin-left: 0; display: block; width: 100%; margin-top: 2px; }
+    .arch-step { flex-wrap: wrap; }
+  }
 </style>
 </head>
 <body>
@@ -445,37 +567,85 @@ root.innerHTML = `
 `;
 
 // 0 — Architecture
-root.appendChild(createSection('arch', '0 — Architecture Overview', '🏗️',
-`<div class="code-block">Input Token IDs: [12, 5, 41, 33, 7]
-       |
-       v
- Token Embedding              (lookup table: 64 × 32)
-       |
-  [× 2 layers]
-  +----+----------------------------------+
-  | RMSNorm                               |
-  | Q, K, V Projections                   |
-  |   Q: (seq, 32) → (seq, 4, 8)         |  4 query heads
-  |   K: (seq, 32) → (seq, 2, 8)         |  2 KV heads (GQA)
-  |   V: (seq, 32) → (seq, 2, 8)         |
-  | RoPE on Q, K                          |
-  | GQA: Expand K,V → 4 heads            |
-  | Scaled Dot-Product Attention          |
-  |   QK^T / √8 + causal mask            |
-  |   Softmax → weighted sum of V         |
-  | Output Projection + Residual          |
-  +----+----------------------------------+
-  | RMSNorm                               |
-  | SwiGLU FFN                            |
-  |   gate = SiLU(x @ W_gate)            |
-  |   up   = x @ W_up                    |
-  |   out  = (gate ⊙ up) @ W_down        |
-  | + Residual                            |
-  +----+----------------------------------+
-       |
-  Final RMSNorm
-  LM Head → (64,) logits
-  Temperature / Top-k / Softmax → Sample</div>`, true));
+(() => {
+  const archFrag = document.createElement('div');
+  archFrag.innerHTML = `
+<div class="prose" style="margin-bottom:16px">The complete data flow from token IDs to next-token prediction. Each box is a computation you can inspect in the sections below.</div>
+<div class="arch-diagram">
+  <div class="arch-flow">
+
+    <div class="arch-node arch-input">
+      <div class="arch-node-label">Input</div>
+      <div class="arch-node-title">Token IDs</div>
+      <div class="arch-node-detail">[12, 5, 41, 33, 7]</div>
+    </div>
+    <div class="arch-arrow"><svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 0 L10 20 M4 15 L10 22 L16 15" stroke="var(--text-dim)" stroke-width="1.5" fill="none"/></svg></div>
+
+    <div class="arch-node arch-embed">
+      <div class="arch-node-icon">&#167;1</div>
+      <div class="arch-node-title">Token Embedding</div>
+      <div class="arch-node-detail">Lookup table: E &#8712; &#8477;<sup>64&#215;32</sup></div>
+      <div class="arch-node-shape">(5, 32)</div>
+    </div>
+    <div class="arch-arrow"><svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 0 L10 20 M4 15 L10 22 L16 15" stroke="var(--text-dim)" stroke-width="1.5" fill="none"/></svg></div>
+
+    <div class="arch-layer-wrap">
+      <div class="arch-layer-badge">&#215; 2 layers</div>
+      <div class="arch-layer">
+
+        <div class="arch-sublayer">
+          <div class="arch-sublayer-header">
+            <span class="arch-sublayer-tag attn-tag">Attention Sub-layer</span>
+            <span class="arch-residual-badge">+ residual</span>
+          </div>
+          <div class="arch-step-grid">
+            <div class="arch-step"><span class="arch-step-ref">&#167;3</span><span class="arch-step-name">RMSNorm</span></div>
+            <div class="arch-step"><span class="arch-step-ref">&#167;4</span><span class="arch-step-name">Q, K, V Projections</span><span class="arch-step-info">Q&#8594;(5,4,8) &ensp;K&#8594;(5,2,8) &ensp;V&#8594;(5,2,8)</span></div>
+            <div class="arch-step"><span class="arch-step-ref">&#167;2</span><span class="arch-step-name">RoPE</span><span class="arch-step-info">Rotate Q, K (not V)</span></div>
+            <div class="arch-step"><span class="arch-step-ref">&#167;4</span><span class="arch-step-name">GQA Expand</span><span class="arch-step-info">K, V: 2 heads &#8594; 4 heads</span></div>
+            <div class="arch-step"><span class="arch-step-ref">&#167;5</span><span class="arch-step-name">Scaled Dot-Product Attention</span><span class="arch-step-info">QK&#7488;/&#8730;8 + causal mask &#8594; softmax &#8594; &#215;V</span></div>
+            <div class="arch-step"><span class="arch-step-ref">&#167;5</span><span class="arch-step-name">Output Projection</span><span class="arch-step-info">Concat heads &#8594; W_o &#8594; (5, 32)</span></div>
+          </div>
+        </div>
+
+        <div class="arch-inner-arrow"><svg width="20" height="18" viewBox="0 0 20 18"><path d="M10 0 L10 12 M5 8 L10 14 L15 8" stroke="var(--border-hi)" stroke-width="1.2" fill="none"/></svg></div>
+
+        <div class="arch-sublayer">
+          <div class="arch-sublayer-header">
+            <span class="arch-sublayer-tag ffn-tag">FFN Sub-layer</span>
+            <span class="arch-residual-badge">+ residual</span>
+          </div>
+          <div class="arch-step-grid">
+            <div class="arch-step"><span class="arch-step-ref">&#167;3</span><span class="arch-step-name">RMSNorm</span></div>
+            <div class="arch-step"><span class="arch-step-ref">&#167;6</span><span class="arch-step-name">SwiGLU FFN</span><span class="arch-step-info">SiLU(x&#183;W_gate) &#8857; x&#183;W_up &#8594; W_down</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="arch-arrow"><svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 0 L10 20 M4 15 L10 22 L16 15" stroke="var(--text-dim)" stroke-width="1.5" fill="none"/></svg></div>
+
+    <div class="arch-node arch-output-stack">
+      <div class="arch-output-row">
+        <div class="arch-mini-node norm-node"><span class="arch-step-ref">&#167;3</span> Final RMSNorm</div>
+        <div class="arch-output-arr">&#8594;</div>
+        <div class="arch-mini-node head-node"><span class="arch-step-ref">&#167;8</span> LM Head<div class="arch-node-shape" style="margin:2px 0 0">(32,) &#8594; (64,)</div></div>
+        <div class="arch-output-arr">&#8594;</div>
+        <div class="arch-mini-node sample-node"><span class="arch-step-ref">&#167;9</span> Sample<div class="arch-node-shape" style="margin:2px 0 0">temp / top-k</div></div>
+      </div>
+    </div>
+    <div class="arch-arrow"><svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 0 L10 20 M4 15 L10 22 L16 15" stroke="var(--text-dim)" stroke-width="1.5" fill="none"/></svg></div>
+
+    <div class="arch-node arch-result">
+      <div class="arch-node-label">Output</div>
+      <div class="arch-node-title">Next Token ID</div>
+    </div>
+
+  </div>
+</div>`;
+  root.appendChild(createSection('arch', '0 &#8212; Architecture Overview', '&#127959;&#65039;', archFrag, true));
+})();
 
 // 1 — Embedding
 root.appendChild(createSection('emb', '1 — Token Embedding', '📖',
