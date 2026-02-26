@@ -277,6 +277,223 @@
     .arch-step-info { margin-left: 0; display: block; width: 100%; margin-top: 2px; }
     .arch-step { flex-wrap: wrap; }
   }
+
+  /* ── Causal Mask Grid ── */
+  .causal-grid-wrap {
+    display: inline-block; margin: 10px 0; padding: 8px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  }
+  .causal-grid-labels-top {
+    display: flex; align-items: center; margin-bottom: 3px;
+  }
+  .causal-grid-corner { width: 32px; height: 18px; }
+  .causal-col-label {
+    width: 34px; text-align: center; font-size: 9px;
+    font-family: 'IBM Plex Mono', monospace; color: var(--accent); opacity: 0.6;
+  }
+  .causal-grid-row { display: flex; align-items: center; margin-bottom: 2px; }
+  .causal-row-label {
+    width: 32px; text-align: right; padding-right: 6px; font-size: 9px;
+    font-family: 'IBM Plex Mono', monospace; color: var(--accent); opacity: 0.6;
+  }
+  .causal-cell {
+    width: 34px; height: 28px; display: flex; align-items: center;
+    justify-content: center; border-radius: 4px; margin: 0 0px;
+  }
+  .causal-ok { background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.15); }
+  .causal-blocked { background: rgba(248,81,73,0.06); border: 1px solid rgba(248,81,73,0.1); }
+
+  /* ── Heatmap Legend & Notes ── */
+  .heatmap-legend {
+    display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+    margin: 12px 0 6px; padding: 8px 12px; border-radius: 6px;
+    background: var(--bg); border: 1px solid var(--border);
+  }
+  .heatmap-legend-item {
+    display: flex; align-items: center; gap: 6px; font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace; color: var(--text-dim);
+  }
+  .heatmap-legend-label { font-weight: 600; color: var(--text); }
+  .heatmap-legend-dot {
+    width: 14px; height: 14px; border-radius: 3px; display: inline-block;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .heatmap-notes { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
+  .heatmap-note {
+    display: flex; align-items: center; gap: 8px; font-size: 11.5px;
+    font-family: 'IBM Plex Mono', monospace; color: var(--text-dim);
+  }
+  .heatmap-note-icon { color: var(--accent); opacity: 0.5; min-width: 16px; text-align: center; }
+
+  /* ── Autoregressive Demo ── */
+  .autoreg-demo {
+    margin: 12px 0; padding: 14px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 8px;
+  }
+  .autoreg-step {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 8px 10px; border-radius: 6px; margin-bottom: 6px;
+    background: rgba(255,255,255,0.015); border: 1px solid var(--border);
+  }
+  .autoreg-step-label {
+    font-size: 10px; font-weight: 700; color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace; min-width: 44px;
+  }
+  .autoreg-tokens { display: flex; gap: 3px; }
+  .autoreg-tok {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 28px; height: 26px; padding: 0 6px; border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600;
+  }
+  .autoreg-tok.input {
+    background: var(--accent-dim); color: var(--accent);
+    border: 1px solid rgba(88,166,255,0.25);
+  }
+  .autoreg-tok.generated {
+    background: var(--green-dim); color: var(--green);
+    border: 1px solid rgba(63,185,80,0.25);
+  }
+  .autoreg-arrow-right { color: var(--text-dim); font-size: 14px; }
+  .autoreg-model {
+    padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace; color: var(--orange);
+    background: rgba(210,153,34,0.08); border: 1px solid rgba(210,153,34,0.2);
+  }
+  .autoreg-pipeline {
+    display: flex; align-items: center; gap: 6px; margin-top: 10px;
+    padding: 8px 12px; border-radius: 6px;
+    background: rgba(188,140,255,0.04); border: 1px solid rgba(188,140,255,0.12);
+    justify-content: center; flex-wrap: wrap;
+  }
+  .autoreg-pipe-step {
+    font-size: 11px; font-family: 'IBM Plex Mono', monospace; font-weight: 600;
+    color: var(--purple); padding: 2px 8px; border-radius: 3px;
+    background: rgba(188,140,255,0.08); border: 1px solid rgba(188,140,255,0.15);
+  }
+  .autoreg-pipe-arr { color: var(--text-dim); font-size: 12px; }
+
+  /* ── KV-Cache Demo ── */
+  .kvcache-demo {
+    margin: 12px 0; padding: 14px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 8px;
+  }
+  .kvcache-step {
+    padding: 10px 12px; border-radius: 6px; margin-bottom: 8px;
+    background: rgba(255,255,255,0.015); border: 1px solid var(--border);
+  }
+  .kvcache-step-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .kvcache-step-num {
+    font-size: 11px; font-weight: 700; font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent); padding: 1px 8px; border-radius: 3px;
+    background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.15);
+  }
+  .kvcache-step-desc {
+    font-size: 12px; color: var(--text-dim); font-family: 'IBM Plex Mono', monospace;
+  }
+  .kvcache-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 5px;
+  }
+  .kvcache-input-label {
+    font-size: 10px; font-weight: 600; color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace; min-width: 46px; text-align: right;
+  }
+  .kvcache-tokens { display: flex; gap: 3px; }
+  .kvcache-cache-slots { display: flex; gap: 3px; flex-wrap: wrap; }
+  .kvcache-slot {
+    display: inline-block; padding: 3px 8px; border-radius: 4px;
+    font-size: 11px; font-family: 'IBM Plex Mono', monospace; font-weight: 600;
+  }
+  .kvcache-slot.filled {
+    background: rgba(57,210,192,0.1); color: var(--cyan);
+    border: 1px solid rgba(57,210,192,0.2);
+  }
+  .kvcache-slot.cached {
+    background: rgba(107,122,141,0.1); color: var(--text-dim);
+    border: 1px dashed rgba(107,122,141,0.25);
+  }
+  .kvcache-slot.new-slot {
+    box-shadow: 0 0 6px rgba(57,210,192,0.2);
+  }
+  .kvcache-attn-desc {
+    font-size: 12px; color: var(--text); font-family: 'IBM Plex Mono', monospace;
+  }
+  .kvcache-attn-desc strong { color: var(--text-bright); }
+  .kvcache-comparison {
+    display: flex; gap: 10px; margin-top: 10px;
+  }
+  .kvcache-compare-item {
+    flex: 1; padding: 10px 14px; border-radius: 6px; text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .kvcache-compare-item.bad {
+    background: rgba(248,81,73,0.06); border: 1px solid rgba(248,81,73,0.15);
+  }
+  .kvcache-compare-item.good {
+    background: rgba(63,185,80,0.06); border: 1px solid rgba(63,185,80,0.15);
+  }
+  .kvcache-compare-label {
+    font-size: 10px; color: var(--text-dim); text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 4px;
+  }
+  .kvcache-compare-val { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+  .bad .kvcache-compare-val { color: var(--red); }
+  .good .kvcache-compare-val { color: var(--green); }
+  .kvcache-compare-desc { font-size: 11px; color: var(--text-dim); }
+
+  /* ── FLOPs Table ── */
+  .flops-table {
+    margin: 10px 0; padding: 12px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .flops-header {
+    display: flex; align-items: center; padding: 0 4px 8px;
+    border-bottom: 1px solid var(--border); margin-bottom: 6px;
+  }
+  .flops-h-name { flex: 1; font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  .flops-h-val { width: 100px; text-align: right; font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  .flops-h-bar { flex: 1; text-align: right; font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; padding-left: 12px; }
+  .flops-row {
+    display: flex; align-items: center; padding: 4px 4px;
+  }
+  .flops-name { flex: 1; font-size: 12px; color: var(--text); }
+  .flops-val { width: 100px; text-align: right; font-size: 12px; color: var(--text-bright); }
+  .flops-bar-wrap { flex: 1; display: flex; align-items: center; gap: 6px; padding-left: 12px; }
+  .flops-bar { height: 10px; border-radius: 3px; min-width: 2px; }
+  .flops-pct { font-size: 10px; color: var(--text-dim); }
+  .flops-divider { height: 1px; background: var(--border); margin: 6px 0; }
+  .flops-divider.thick { height: 2px; background: var(--border-hi); }
+  .flops-subtotal .flops-name, .flops-subtotal .flops-val { color: var(--text-dim); }
+  .flops-total .flops-name { font-weight: 700; color: var(--text-bright); font-size: 13px; }
+  .flops-total .flops-val { font-weight: 700; color: var(--cyan); font-size: 13px; }
+
+  /* ── Scaling Insight Cards ── */
+  .scaling-insight {
+    margin-top: 14px; padding: 12px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 8px;
+  }
+  .scaling-insight-title {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--text-dim); font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 10px;
+  }
+  .scaling-cards { display: flex; gap: 8px; }
+  .scaling-card {
+    flex: 1; padding: 10px 12px; border-radius: 6px;
+    background: rgba(255,255,255,0.015); border: 1px solid var(--border);
+    text-align: center; font-family: 'IBM Plex Mono', monospace;
+  }
+  .scaling-card-head { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+  .scaling-card-formula { font-size: 16px; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+  .scaling-card-desc { font-size: 10px; color: var(--text-dim); line-height: 1.4; }
+
+  @media (max-width: 600px) {
+    .scaling-cards { flex-direction: column; }
+    .kvcache-comparison { flex-direction: column; }
+    .autoreg-step { font-size: 11px; }
+  }
 </style>
 </head>
 <body>
@@ -715,20 +932,37 @@ Grouped-Query (GQA):         2 KV heads for 4 Q heads  = 0.5× memory  ← our c
   frag.innerHTML = `
 <div class="prose">The core computation: each position queries all previous positions. The <strong>causal mask</strong> prevents attending to the future.</div>
 <div class="math-block">Attention(Q, K, V) = softmax(QK^T / √d_head + CausalMask) · V</div>
-<div class="prose"><strong>Causal mask</strong> — position i can only attend to positions 0..i:</div>
-<div class="causal-mask">${Array.from({length:SEQ},(_,i)=>
-  '  pos '+i+': ['+Array.from({length:SEQ},(_,j)=>j<=i?'<span class="cm-ok"> ✓ </span>':'<span class="cm-block"> ✗ </span>').join('')+']'
-).join('<br>')}</div>
-<div class="prose" style="margin-top:14px"><strong>Attention weights</strong> after softmax — brighter = higher weight:</div>
+<div class="prose"><strong>Causal mask</strong> &#8212; position i can only attend to positions 0..i:</div>
+<div class="causal-grid-wrap">
+  <div class="causal-grid-labels-top">
+    <div class="causal-grid-corner"></div>
+    ${Array.from({length:SEQ},(_,j)=>'<div class="causal-col-label">K'+j+'</div>').join('')}
+  </div>
+  ${Array.from({length:SEQ},(_,i)=>
+    '<div class="causal-grid-row"><div class="causal-row-label">Q'+i+'</div>'
+    +Array.from({length:SEQ},(_,j)=>
+      j<=i
+        ? '<div class="causal-cell causal-ok" title="Q'+i+' attends to K'+j+'"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7 L6 10 L11 4" stroke="var(--green)" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+        : '<div class="causal-cell causal-blocked" title="Q'+i+' cannot see K'+j+' (future)"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M4 4 L10 10 M10 4 L4 10" stroke="var(--red)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>'
+    ).join('')+'</div>'
+  ).join('')}
+</div>
+<div class="prose" style="margin-top:16px"><strong>Attention weights</strong> after softmax &#8212; brighter = higher weight:</div>
 <div class="prose" style="margin-top:10px;font-size:12px;color:var(--text-dim)">Layer 0:</div>
 <div class="heatmap-wrap" id="hm-layer0"></div>
 <div class="prose" style="margin-top:10px;font-size:12px;color:var(--text-dim)">Layer 1 (deeper, more refined patterns):</div>
 <div class="heatmap-wrap" id="hm-layer1"></div>
-<div class="output">Reading the heatmaps:
-  • Row = query position, Column = key position
-  • Each row sums to 1.0 (softmax)
-  • Upper-right triangle is blank (causal mask)
-  • Position 0 always attends 100% to itself (only option)</div>`;
+<div class="heatmap-legend">
+  <div class="heatmap-legend-item"><span class="heatmap-legend-label">Reading the heatmaps:</span></div>
+  <div class="heatmap-legend-item"><span class="heatmap-legend-dot" style="background:var(--accent);opacity:0.3"></span> Low attention</div>
+  <div class="heatmap-legend-item"><span class="heatmap-legend-dot" style="background:var(--accent)"></span> High attention</div>
+  <div class="heatmap-legend-item"><span class="heatmap-legend-dot" style="background:var(--surface)"></span> Masked (future)</div>
+</div>
+<div class="heatmap-notes">
+  <div class="heatmap-note"><span class="heatmap-note-icon">&#8594;</span> Row = query position, Column = key position</div>
+  <div class="heatmap-note"><span class="heatmap-note-icon">&#8721;</span> Each row sums to 1.0 (softmax normalization)</div>
+  <div class="heatmap-note"><span class="heatmap-note-icon">&#9632;</span> Position 0 always attends 100% to itself (only option)</div>
+</div>`;
   const sec = createSection('attn', '5 — Scaled Dot-Product Attention + Causal Mask', '👁️', frag, true);
   root.appendChild(sec);
   // Add heatmaps after DOM insertion
@@ -826,10 +1060,49 @@ Pipeline: logits → ÷temperature → top-k filter → top-p filter → softmax
   const frag = document.createElement('div');
   frag.innerHTML = `
 <div class="prose">Feed the model its own output, one token at a time. Each step runs the <strong>full forward pass</strong> on the growing sequence. (A production system uses KV-cache to avoid recomputing past tokens.)</div>
-<div class="code-block">Step 1: model([12, 5, 41, 33, 7])     → predicts next token
-Step 2: model([12, 5, 41, 33, 7, ??])  → predicts next token
-Step 3: model([12, 5, 41, 33, 7, ?, ?]) → ...
-Each step: full embed → N layers → norm → LM head → sample</div>
+<div class="autoreg-demo">
+  <div class="autoreg-step">
+    <div class="autoreg-step-label">Step 1</div>
+    <div class="autoreg-tokens">
+      <span class="autoreg-tok input">12</span><span class="autoreg-tok input">5</span><span class="autoreg-tok input">41</span><span class="autoreg-tok input">33</span><span class="autoreg-tok input">7</span>
+    </div>
+    <div class="autoreg-arrow-right">&#8594;</div>
+    <div class="autoreg-model">model()</div>
+    <div class="autoreg-arrow-right">&#8594;</div>
+    <div class="autoreg-tok generated">?</div>
+  </div>
+  <div class="autoreg-step">
+    <div class="autoreg-step-label">Step 2</div>
+    <div class="autoreg-tokens">
+      <span class="autoreg-tok input">12</span><span class="autoreg-tok input">5</span><span class="autoreg-tok input">41</span><span class="autoreg-tok input">33</span><span class="autoreg-tok input">7</span><span class="autoreg-tok generated">?</span>
+    </div>
+    <div class="autoreg-arrow-right">&#8594;</div>
+    <div class="autoreg-model">model()</div>
+    <div class="autoreg-arrow-right">&#8594;</div>
+    <div class="autoreg-tok generated">?</div>
+  </div>
+  <div class="autoreg-step">
+    <div class="autoreg-step-label">Step 3</div>
+    <div class="autoreg-tokens">
+      <span class="autoreg-tok input">12</span><span class="autoreg-tok input">5</span><span class="autoreg-tok input">41</span><span class="autoreg-tok input">33</span><span class="autoreg-tok input">7</span><span class="autoreg-tok generated">?</span><span class="autoreg-tok generated">?</span>
+    </div>
+    <div class="autoreg-arrow-right">&#8594;</div>
+    <div class="autoreg-model">model()</div>
+    <div class="autoreg-arrow-right">&#8594;</div>
+    <div class="autoreg-tok generated">?</div>
+  </div>
+  <div class="autoreg-pipeline">
+    <span class="autoreg-pipe-step">embed</span>
+    <span class="autoreg-pipe-arr">&#8594;</span>
+    <span class="autoreg-pipe-step">N layers</span>
+    <span class="autoreg-pipe-arr">&#8594;</span>
+    <span class="autoreg-pipe-step">norm</span>
+    <span class="autoreg-pipe-arr">&#8594;</span>
+    <span class="autoreg-pipe-step">LM head</span>
+    <span class="autoreg-pipe-arr">&#8594;</span>
+    <span class="autoreg-pipe-step">sample</span>
+  </div>
+</div>
 <button class="gen-btn" id="gen-btn">▶ Generate 8 Tokens</button>
 <div id="gen-output"></div>`;
   root.appendChild(createSection('generate', '10 — Autoregressive Generation', '🚀', frag, true));
@@ -865,16 +1138,65 @@ ${seq.map((tok,i) => `<span class="token-chip ${i<INPUT_IDS.length?'input':'gene
 // 11 — KV-Cache
 root.appendChild(createSection('kvcache', '11 — KV-Cache (Efficient Inference)', '💾',
 `<div class="prose">During generation, K and V for past positions <strong>do not change</strong>. The KV-cache stores them to avoid recomputation:</div>
-<div class="code-block">Step 1: input = [A, B, C]
-  Compute & cache K₀,V₀  K₁,V₁  K₂,V₂
-  Q₂ attends to ALL cached KV
-
-Step 2: input = [D]  ← only the NEW token!
-  Compute K₃,V₃ and APPEND to cache
-  Q₃ attends to cached K₀:₃, V₀:₃
-
-Without cache: O(n²) per step  (recompute everything)
-With cache:    O(n) per step   (only new token)</div>
+<div class="kvcache-demo">
+  <div class="kvcache-step">
+    <div class="kvcache-step-header">
+      <span class="kvcache-step-num">Step 1</span>
+      <span class="kvcache-step-desc">Prefill &#8212; process full input</span>
+    </div>
+    <div class="kvcache-row">
+      <div class="kvcache-input-label">Input:</div>
+      <div class="kvcache-tokens"><span class="autoreg-tok input">A</span><span class="autoreg-tok input">B</span><span class="autoreg-tok input">C</span></div>
+    </div>
+    <div class="kvcache-row">
+      <div class="kvcache-input-label">Cache:</div>
+      <div class="kvcache-cache-slots">
+        <span class="kvcache-slot filled">K&#8320;,V&#8320;</span>
+        <span class="kvcache-slot filled">K&#8321;,V&#8321;</span>
+        <span class="kvcache-slot filled">K&#8322;,V&#8322;</span>
+      </div>
+    </div>
+    <div class="kvcache-row">
+      <div class="kvcache-input-label">Attn:</div>
+      <div class="kvcache-attn-desc">Q&#8322; attends to <strong>all cached</strong> KV</div>
+    </div>
+  </div>
+  <div class="kvcache-step">
+    <div class="kvcache-step-header">
+      <span class="kvcache-step-num">Step 2</span>
+      <span class="kvcache-step-desc">Decode &#8212; only the new token!</span>
+    </div>
+    <div class="kvcache-row">
+      <div class="kvcache-input-label">Input:</div>
+      <div class="kvcache-tokens"><span class="autoreg-tok generated">D</span></div>
+    </div>
+    <div class="kvcache-row">
+      <div class="kvcache-input-label">Cache:</div>
+      <div class="kvcache-cache-slots">
+        <span class="kvcache-slot cached">K&#8320;,V&#8320;</span>
+        <span class="kvcache-slot cached">K&#8321;,V&#8321;</span>
+        <span class="kvcache-slot cached">K&#8322;,V&#8322;</span>
+        <span class="kvcache-slot filled new-slot">K&#8323;,V&#8323;</span>
+      </div>
+    </div>
+    <div class="kvcache-row">
+      <div class="kvcache-input-label">Attn:</div>
+      <div class="kvcache-attn-desc">Q&#8323; attends to cached K&#8320;&#8336;&#8323;, V&#8320;&#8336;&#8323;</div>
+    </div>
+  </div>
+  <div class="kvcache-comparison">
+    <div class="kvcache-compare-item bad">
+      <div class="kvcache-compare-label">Without cache</div>
+      <div class="kvcache-compare-val">O(n&#178;) per step</div>
+      <div class="kvcache-compare-desc">Recompute everything</div>
+    </div>
+    <div class="kvcache-compare-item good">
+      <div class="kvcache-compare-label">With cache</div>
+      <div class="kvcache-compare-val">O(n) per step</div>
+      <div class="kvcache-compare-desc">Only new token</div>
+    </div>
+  </div>
+</div>
 <div class="output">KV-Cache memory per layer (this model):
   K + V: 2 × seq_len × ${C.KV} heads × ${C.Dh} dims × 4 bytes
   = ${2*C.KV*C.Dh*4} bytes per token per layer
@@ -894,26 +1216,69 @@ This is why GQA matters — with 8 KV heads instead of 32:
   const op=S*H*Dh*D*2, ffn=S*(2*D*F+F*D)*2;
   const layer=qkv+as+av+op+ffn, total=layer*C.L+D*C.V*2;
   root.appendChild(createSection('flops', '12 — Computation & Memory Summary', '📊',
-`<div class="output">FLOPs per layer (seq_len=${S}):
-  QKV Projections:      ${qkv.toLocaleString().padStart(10)}
-  Attention (QK^T):     ${as.toLocaleString().padStart(10)}
-  Attention (× V):      ${av.toLocaleString().padStart(10)}
-  Output Projection:    ${op.toLocaleString().padStart(10)}
-  SwiGLU FFN:           ${ffn.toLocaleString().padStart(10)}
-  ─────────────────────────────────────
-  Per layer:            ${layer.toLocaleString().padStart(10)}
-  × ${C.L} layers:            ${(layer*C.L).toLocaleString().padStart(10)}
-  + LM Head:            ${(D*C.V*2).toLocaleString().padStart(10)}
-  ═══════════════════════════════════════
-  TOTAL:                ${total.toLocaleString().padStart(10)} FLOPs
-
-Key scaling insight:
-  Attention: O(n² · d)  — quadratic in sequence length
-  FFN:       O(n · d²)  — quadratic in model dimension
-
-  Short sequences → FFN dominates
-  Long sequences  → Attention dominates
-  Crossover point ≈ when seq_len ≈ d_model</div>`));
+`<div class="prose">Breakdown of floating-point operations for a single forward pass:</div>
+<div class="flops-table">
+  <div class="flops-header">
+    <span class="flops-h-name">Operation</span>
+    <span class="flops-h-val">FLOPs</span>
+    <span class="flops-h-bar">Share</span>
+  </div>
+  ${[
+    ['QKV Projections', qkv, '--accent'],
+    ['Attention (QK&#7488;)', as, '--purple'],
+    ['Attention (&#215; V)', av, '--purple'],
+    ['Output Projection', op, '--accent'],
+    ['SwiGLU FFN', ffn, '--green'],
+  ].map(([name, val, color]) =>
+    '<div class="flops-row">'
+    +'<span class="flops-name">'+name+'</span>'
+    +'<span class="flops-val">'+val.toLocaleString()+'</span>'
+    +'<span class="flops-bar-wrap"><span class="flops-bar" style="width:'+Math.round(val/layer*100)+'%;background:var('+color+')"></span><span class="flops-pct">'+(val/layer*100).toFixed(1)+'%</span></span>'
+    +'</div>'
+  ).join('')}
+  <div class="flops-divider"></div>
+  <div class="flops-row flops-subtotal">
+    <span class="flops-name">Per layer</span>
+    <span class="flops-val">${layer.toLocaleString()}</span>
+    <span class="flops-bar-wrap"></span>
+  </div>
+  <div class="flops-row">
+    <span class="flops-name">&#215; ${C.L} layers</span>
+    <span class="flops-val">${(layer*C.L).toLocaleString()}</span>
+    <span class="flops-bar-wrap"></span>
+  </div>
+  <div class="flops-row">
+    <span class="flops-name">+ LM Head</span>
+    <span class="flops-val">${(D*C.V*2).toLocaleString()}</span>
+    <span class="flops-bar-wrap"></span>
+  </div>
+  <div class="flops-divider thick"></div>
+  <div class="flops-row flops-total">
+    <span class="flops-name">Total</span>
+    <span class="flops-val">${total.toLocaleString()} FLOPs</span>
+    <span class="flops-bar-wrap"></span>
+  </div>
+</div>
+<div class="scaling-insight">
+  <div class="scaling-insight-title">Scaling insight</div>
+  <div class="scaling-cards">
+    <div class="scaling-card">
+      <div class="scaling-card-head" style="color:var(--purple)">Attention</div>
+      <div class="scaling-card-formula">O(n&#178; &#183; d)</div>
+      <div class="scaling-card-desc">Quadratic in sequence length</div>
+    </div>
+    <div class="scaling-card">
+      <div class="scaling-card-head" style="color:var(--green)">FFN</div>
+      <div class="scaling-card-formula">O(n &#183; d&#178;)</div>
+      <div class="scaling-card-desc">Quadratic in model dimension</div>
+    </div>
+    <div class="scaling-card">
+      <div class="scaling-card-head" style="color:var(--orange)">Crossover</div>
+      <div class="scaling-card-formula">seq &#8776; d_model</div>
+      <div class="scaling-card-desc">Short seq &#8594; FFN dominates; Long seq &#8594; Attention dominates</div>
+    </div>
+  </div>
+</div>`));
 })();
 
 // 13 — Summary
