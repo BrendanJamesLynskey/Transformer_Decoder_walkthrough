@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Transformer Decoder — Every Computation, From Scratch</title>
+<meta name="description" content="Interactive walkthrough of every operation inside a GPT-style autoregressive transformer decoder. All computations run live in your browser.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface-hover: #1a2235;
+    --border: #1e2a3a;
+    --border-hi: #2d4a6f;
+    --text: #c9d1d9;
+    --text-dim: #6b7a8d;
+    --text-bright: #e6edf3;
+    --accent: #58a6ff;
+    --accent-dim: #1a3a5c;
+    --green: #3fb950;
+    --green-dim: #1a3328;
+    --orange: #d29922;
+    --orange-dim: #3d2e0a;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --purple-dim: #2a1f3d;
+    --cyan: #39d2c0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root { max-width: 880px; margin: 0 auto; padding: 32px 20px 64px; }
+
+  .header-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 3px;
+    color: var(--accent); font-family: 'IBM Plex Mono', monospace; margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 28px; font-weight: 700; color: var(--text-bright);
+    font-family: 'IBM Plex Mono', monospace; line-height: 1.3; margin-bottom: 4px;
+  }
+  h1 .sub { color: var(--text-dim); font-weight: 400; font-size: 18px; }
+  .intro { color: var(--text-dim); font-size: 13.5px; margin-top: 12px; line-height: 1.65; max-width: 700px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    background: rgba(88,166,255,0.08); color: var(--accent);
+    border: 1px solid rgba(88,166,255,0.2);
+  }
+  .tag.cyan { background: rgba(57,210,192,0.08); color: var(--cyan); border-color: rgba(57,210,192,0.2); }
+  .tag.orange { background: rgba(210,153,34,0.08); color: var(--orange); border-color: rgba(210,153,34,0.2); }
+
+  .section {
+    margin-bottom: 16px; border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden; background: var(--surface);
+  }
+  .section-header {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; background: transparent; border: none;
+    color: var(--text-bright); cursor: pointer; font-size: 15px; font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace; text-align: left;
+    border-bottom: 1px solid transparent; transition: background 0.15s;
+  }
+  .section-header:hover { background: var(--surface-hover); }
+  .section-header.open { background: var(--surface-hover); border-bottom-color: var(--border); }
+  .section-header .emoji { font-size: 18px; }
+  .section-header .title { flex: 1; }
+  .section-header .arrow {
+    color: var(--text-dim); font-size: 13px;
+    transition: transform 0.15s; display: inline-block;
+  }
+  .section-header.open .arrow { transform: rotate(90deg); }
+  .section-body { padding: 16px 18px; }
+
+  .prose { color: var(--text); font-size: 13.5px; line-height: 1.7; margin: 6px 0; }
+  .prose strong { color: var(--text-bright); }
+
+  .math-block {
+    background: var(--purple-dim); border: 1px solid rgba(188,140,255,0.2);
+    border-radius: 6px; padding: 10px 14px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; color: var(--purple); margin: 10px 0; text-align: center;
+    overflow-x: auto;
+  }
+
+  .code-block {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    color: var(--green); overflow-x: auto; margin: 8px 0; line-height: 1.55;
+    white-space: pre; tab-size: 2;
+  }
+
+  .output {
+    background: #0d1117; border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0; padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+    color: var(--text); overflow-x: auto; margin: 8px 0;
+    line-height: 1.55; white-space: pre-wrap;
+  }
+
+  .causal-mask { font-family: 'IBM Plex Mono', monospace; font-size: 11px; margin: 8px 0; }
+  .cm-ok { color: var(--green); }
+  .cm-block { color: var(--red); }
+
+  .heatmap-wrap { overflow-x: auto; display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+  .heatmap-label { font-size: 10px; color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; margin-bottom: 2px; }
+  .heatmap-grid { display: inline-grid; gap: 1px; }
+  .heatmap-cell {
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 2px; font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .bar-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+  .bar-label { width: 30px; color: var(--text-dim); text-align: right; }
+  .bar-fill { height: 14px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--cyan)); min-width: 1px; transition: width 0.3s; }
+  .bar-value { color: var(--text-dim); }
+
+  .gen-btn {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    color: #000; border: none; border-radius: 6px; font-size: 14px;
+    font-weight: 700; font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer; letter-spacing: 0.5px; margin: 12px 0;
+    transition: opacity 0.15s;
+  }
+  .gen-btn:hover { opacity: 0.9; }
+
+  .token-chip {
+    display: inline-block; padding: 4px 10px; border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600;
+  }
+  .token-chip.input { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(88,166,255,0.27); }
+  .token-chip.generated { background: var(--green-dim); color: var(--green); border: 1px solid rgba(63,185,80,0.27); }
+
+  .takeaway {
+    display: flex; gap: 12px; padding: 10px 14px; border-radius: 6px; margin-bottom: 6px;
+  }
+  .takeaway-num { font-weight: 700; font-size: 14px; font-family: 'IBM Plex Mono', monospace; min-width: 20px; }
+  .takeaway-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+  .takeaway-desc { color: var(--text-dim); font-size: 12.5px; }
+
+  .footer {
+    margin-top: 16px; padding: 12px 16px; background: var(--bg);
+    border-radius: 6px; border: 1px solid var(--border); font-size: 12px;
+    color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; text-align: center;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// MATH ENGINE
+// ═══════════════════════════════════════════════════════════════
+
+function seededRng(seed) {
+  let s = seed;
+  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+
+const C = { V:64, D:32, H:4, KV:2, Dh:8, Ff:86, L:2, maxSeq:16, theta:10000, eps:1e-6 };
+
+function randn(shape, scale, rng) {
+  const sz = shape.reduce((a,b)=>a*b,1), d = new Float32Array(sz);
+  for (let i=0;i<sz;i+=2) {
+    const u1=rng()||1e-10, u2=rng(), r=Math.sqrt(-2*Math.log(u1));
+    d[i]=r*Math.cos(2*Math.PI*u2)*scale;
+    if(i+1<sz) d[i+1]=r*Math.sin(2*Math.PI*u2)*scale;
+  }
+  return {d,s:[...shape]};
+}
+function ones(shape) { return {d:new Float32Array(shape.reduce((a,b)=>a*b,1)).fill(1),s:[...shape]}; }
+function zeros(shape) { return {d:new Float32Array(shape.reduce((a,b)=>a*b,1)),s:[...shape]}; }
+function clone(t) { return {d:new Float32Array(t.d),s:[...t.s]}; }
+
+function matmul2d(a,b) {
+  const [M,K]=a.s, N=b.s[1], o=zeros([M,N]);
+  for(let m=0;m<M;m++) for(let n=0;n<N;n++) {
+    let v=0; for(let k=0;k<K;k++) v+=a.d[m*K+k]*b.d[k*N+n]; o.d[m*N+n]=v;
+  }
+  return o;
+}
+function matmul1x2d(a,b) {
+  const K=a.s[0],N=b.s[1],o=zeros([N]);
+  for(let n=0;n<N;n++){let v=0;for(let k=0;k<K;k++)v+=a.d[k]*b.d[k*N+n];o.d[n]=v;}
+  return o;
+}
+function bmm(a,b) {
+  const [B,M,K]=a.s, N=b.s[2], o=zeros([B,M,N]);
+  for(let bi=0;bi<B;bi++) for(let m=0;m<M;m++) for(let n=0;n<N;n++) {
+    let v=0; for(let k=0;k<K;k++) v+=a.d[bi*M*K+m*K+k]*b.d[bi*K*N+k*N+n];
+    o.d[bi*M*N+m*N+n]=v;
+  }
+  return o;
+}
+function transpose3d(t) {
+  const [B,M,N]=t.s, o=zeros([B,N,M]);
+  for(let b=0;b<B;b++) for(let m=0;m<M;m++) for(let n=0;n<N;n++)
+    o.d[b*N*M+n*M+m]=t.d[b*M*N+m*N+n];
+  return o;
+}
+function perm012to102(t) {
+  const [S,H,D]=t.s, o=zeros([H,S,D]);
+  for(let s=0;s<S;s++) for(let h=0;h<H;h++) for(let d=0;d<D;d++)
+    o.d[h*S*D+s*D+d]=t.d[s*H*D+h*D+d];
+  return o;
+}
+function perm102to012(t) {
+  const [H,S,D]=t.s, o=zeros([S,H,D]);
+  for(let s=0;s<S;s++) for(let h=0;h<H;h++) for(let d=0;d<D;d++)
+    o.d[s*H*D+h*D+d]=t.d[h*S*D+s*D+d];
+  return o;
+}
+function reshape(t,ns) { return {d:t.d,s:[...ns]}; }
+function sliceRows(t,rows) {
+  const c=t.s[1],o=zeros([rows.length,c]);
+  for(let i=0;i<rows.length;i++){const src=rows[i]*c;for(let j=0;j<c;j++)o.d[i*c+j]=t.d[src+j];}
+  return o;
+}
+function sliceRow(t,r) { const c=t.s[t.s.length-1]; return {d:t.d.slice(r*c,r*c+c),s:[c]}; }
+function add(a,b) { const o={d:new Float32Array(a.d.length),s:[...a.s]}; for(let i=0;i<a.d.length;i++)o.d[i]=a.d[i]+b.d[i]; return o; }
+function mul(a,b) { const o={d:new Float32Array(a.d.length),s:[...a.s]}; for(let i=0;i<a.d.length;i++)o.d[i]=a.d[i]*b.d[i]; return o; }
+function norm(t) { let s=0; for(let i=0;i<t.d.length;i++)s+=t.d[i]*t.d[i]; return Math.sqrt(s); }
+
+function rmsnorm(x,w) {
+  const [S,D]=x.s, o=zeros(x.s);
+  for(let s=0;s<S;s++) {
+    let sq=0; for(let d=0;d<D;d++){const v=x.d[s*D+d];sq+=v*v;}
+    const rms=Math.sqrt(sq/D+C.eps);
+    for(let d=0;d<D;d++) o.d[s*D+d]=(x.d[s*D+d]/rms)*w.d[d];
+  }
+  return o;
+}
+
+function computeRope() {
+  const hd=C.Dh/2, fr=new Float32Array(hd);
+  for(let i=0;i<hd;i++) fr[i]=1/Math.pow(C.theta,2*i/C.Dh);
+  const cos=zeros([C.maxSeq,hd]),sin=zeros([C.maxSeq,hd]);
+  for(let t=0;t<C.maxSeq;t++) for(let i=0;i<hd;i++) {
+    const a=t*fr[i]; cos.d[t*hd+i]=Math.cos(a); sin.d[t*hd+i]=Math.sin(a);
+  }
+  return {cos,sin,fr};
+}
+
+function applyRope(qk,cos,sin,sp) {
+  sp=sp||0;
+  const [S,nH,dH]=qk.s, hd=dH/2, o=zeros(qk.s);
+  for(let s=0;s<S;s++){const p=sp+s;
+    for(let h=0;h<nH;h++) for(let i=0;i<hd;i++){
+      const cv=cos.d[p*hd+i],sv=sin.d[p*hd+i];
+      const ev=qk.d[s*nH*dH+h*dH+i], od=qk.d[s*nH*dH+h*dH+hd+i];
+      o.d[s*nH*dH+h*dH+i]=ev*cv-od*sv;
+      o.d[s*nH*dH+h*dH+hd+i]=ev*sv+od*cv;
+    }
+  }
+  return o;
+}
+
+function expandKV(t,nRep) {
+  if(nRep===1)return t;
+  const [S,nKV,D]=t.s, o=zeros([S,nKV*nRep,D]);
+  for(let s=0;s<S;s++) for(let kv=0;kv<nKV;kv++) for(let r=0;r<nRep;r++)
+    for(let d=0;d<D;d++) o.d[s*nKV*nRep*D+(kv*nRep+r)*D+d]=t.d[s*nKV*D+kv*D+d];
+  return o;
+}
+
+function silu(x) {
+  const o={d:new Float32Array(x.d.length),s:[...x.s]};
+  for(let i=0;i<x.d.length;i++){const v=x.d[i];o.d[i]=v/(1+Math.exp(-v));}
+  return o;
+}
+
+function softmaxRow(d,off,len) {
+  let mx=-Infinity; for(let i=0;i<len;i++)mx=Math.max(mx,d[off+i]);
+  let sm=0; for(let i=0;i<len;i++){d[off+i]=Math.exp(d[off+i]-mx);sm+=d[off+i];}
+  for(let i=0;i<len;i++)d[off+i]/=sm;
+}
+function softmax1D(logits) {
+  const o=new Float32Array(logits.length);
+  let mx=-Infinity; for(let i=0;i<logits.length;i++)mx=Math.max(mx,logits[i]);
+  let sm=0; for(let i=0;i<logits.length;i++){o[i]=Math.exp(logits[i]-mx);sm+=o[i];}
+  for(let i=0;i<logits.length;i++)o[i]/=sm;
+  return o;
+}
+
+function attention(q,k,v) {
+  const S=q.s[0],nH=q.s[1];
+  const qt=perm012to102(q),kt=perm012to102(k),vt=perm012to102(v);
+  const sc=bmm(qt,transpose3d(kt)), scale=Math.sqrt(C.Dh);
+  for(let i=0;i<sc.d.length;i++)sc.d[i]/=scale;
+  for(let h=0;h<nH;h++) for(let i=0;i<S;i++) for(let j=i+1;j<S;j++)
+    sc.d[h*S*S+i*S+j]=-1e9;
+  for(let h=0;h<nH;h++) for(let i=0;i<S;i++) softmaxRow(sc.d,h*S*S+i*S,S);
+  return {output:perm102to012(bmm(sc,vt)),weights:sc};
+}
+
+function initParams(rng) {
+  const p={}, w=(sh)=>randn(sh,0.02,rng);
+  p.tokEmb=w([C.V,C.D]);
+  for(let l=0;l<C.L;l++){
+    const f=`l${l}_`;
+    p[f+'an']=ones([C.D]); p[f+'wq']=w([C.D,C.H*C.Dh]); p[f+'wk']=w([C.D,C.KV*C.Dh]);
+    p[f+'wv']=w([C.D,C.KV*C.Dh]); p[f+'wo']=w([C.H*C.Dh,C.D]); p[f+'fn']=ones([C.D]);
+    p[f+'wg']=w([C.D,C.Ff]); p[f+'wu']=w([C.D,C.Ff]); p[f+'wd']=w([C.Ff,C.D]);
+  }
+  p.finalNorm=ones([C.D]); p.lmHead=w([C.D,C.V]);
+  return p;
+}
+
+function forwardBlock(x,l,p,rope) {
+  const nRep=C.H/C.KV, S=x.s[0], f=`l${l}_`;
+  const xn=rmsnorm(x,p[f+'an']);
+  let q=reshape(matmul2d(xn,p[f+'wq']),[S,C.H,C.Dh]);
+  let k=reshape(matmul2d(xn,p[f+'wk']),[S,C.KV,C.Dh]);
+  let v=reshape(matmul2d(xn,p[f+'wv']),[S,C.KV,C.Dh]);
+  q=applyRope(q,rope.cos,rope.sin); k=applyRope(k,rope.cos,rope.sin);
+  const kE=expandKV(k,nRep),vE=expandKV(v,nRep);
+  const {output:aO,weights:aW}=attention(q,kE,vE);
+  let h=add(x,matmul2d(reshape(aO,[S,C.H*C.Dh]),p[f+'wo']));
+  const hn=rmsnorm(h,p[f+'fn']);
+  const gate=silu(matmul2d(hn,p[f+'wg'])),up=matmul2d(hn,p[f+'wu']);
+  h=add(h,matmul2d(mul(gate,up),p[f+'wd']));
+  return {h,aW,q,k:kE,v:vE};
+}
+
+function fullForward(ids,p,rope) {
+  let h=sliceRows(p.tokEmb,ids);
+  const layers=[];
+  for(let l=0;l<C.L;l++){const r=forwardBlock(h,l,p,rope);layers.push(r);h=r.h;}
+  const hN=rmsnorm(h,p.finalNorm), last=sliceRow(hN,ids.length-1);
+  const logits=matmul1x2d(last,p.lmHead);
+  return {logits:logits.d,layers,hN};
+}
+
+function sampleToken(logits,temp,topK,rng) {
+  const V=logits.length, sc=new Float32Array(V);
+  for(let i=0;i<V;i++)sc[i]=logits[i]/temp;
+  const idx=Array.from({length:V},(_,i)=>i).sort((a,b)=>sc[b]-sc[a]);
+  const fil=new Float32Array(V).fill(-1e9);
+  for(let i=0;i<topK;i++)fil[idx[i]]=sc[idx[i]];
+  const pr=softmax1D(fil);
+  let r=rng(),cum=0;
+  for(let i=0;i<V;i++){cum+=pr[i];if(r<cum)return{id:i,pr};}
+  return{id:V-1,pr};
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT MODEL
+// ═══════════════════════════════════════════════════════════════
+
+const params = initParams(seededRng(42));
+const rope = computeRope();
+const INPUT_IDS = [12, 5, 41, 33, 7];
+const SEQ = INPUT_IDS.length;
+const result = fullForward(INPUT_IDS, params, rope);
+const embedded = sliceRows(params.tokEmb, INPUT_IDS);
+
+let totalP = 0;
+for (const k in params) totalP += params[k].d.length;
+
+// ═══════════════════════════════════════════════════════════════
+// DOM RENDERING
+// ═══════════════════════════════════════════════════════════════
+
+function fmtArr(data, n, dec) {
+  n=n||8; dec=dec||4;
+  const items=Array.from(data).slice(0,n).map(v=>v.toFixed(dec));
+  if(data.length>n) items.push('...+'+(data.length-n));
+  return '['+items.join(', ')+']';
+}
+
+function createSection(id, title, emoji, content, open) {
+  const sec = document.createElement('div');
+  sec.className = 'section';
+  const hdr = document.createElement('button');
+  hdr.className = 'section-header' + (open ? ' open' : '');
+  hdr.innerHTML = `<span class="emoji">${emoji}</span><span class="title">${title}</span><span class="arrow">▶</span>`;
+  const body = document.createElement('div');
+  body.className = 'section-body';
+  body.style.display = open ? 'block' : 'none';
+  if (typeof content === 'string') body.innerHTML = content;
+  else body.appendChild(content);
+  hdr.onclick = () => {
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    hdr.className = 'section-header' + (isOpen ? '' : ' open');
+  };
+  sec.appendChild(hdr);
+  sec.appendChild(body);
+  return sec;
+}
+
+function buildHeatmap(weights, seqLen, headIdx) {
+  const cellSz = Math.min(38, 210/seqLen);
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:inline-block;margin:4px 12px 4px 0;';
+  wrap.innerHTML = `<div class="heatmap-label">Head ${headIdx}</div>`;
+  const grid = document.createElement('div');
+  grid.className = 'heatmap-grid';
+  grid.style.gridTemplateColumns = `repeat(${seqLen}, ${cellSz}px)`;
+  const off = headIdx * seqLen * seqLen;
+  for (let r = 0; r < seqLen; r++) for (let c = 0; c < seqLen; c++) {
+    const v = weights.d[off + r*seqLen + c];
+    const intensity = Math.pow(v, 0.5);
+    const cell = document.createElement('div');
+    cell.className = 'heatmap-cell';
+    cell.style.cssText = `width:${cellSz}px;height:${cellSz}px;font-size:${cellSz>28?8:0}px;`;
+    cell.style.background = c > r ? 'var(--surface)' : `rgba(88,166,255,${intensity*0.9+0.05})`;
+    cell.style.color = intensity > 0.5 ? '#000' : 'var(--text-dim)';
+    cell.title = `pos ${r} → pos ${c}: ${v.toFixed(4)}`;
+    if (cellSz > 28) cell.textContent = v.toFixed(2);
+    grid.appendChild(cell);
+  }
+  wrap.appendChild(grid);
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BUILD PAGE
+// ═══════════════════════════════════════════════════════════════
+
+const root = document.getElementById('root');
+
+// Header
+root.innerHTML = `
+<div class="header-label">Interactive Notebook</div>
+<h1>The Transformer Decoder<br><span class="sub">Every Computation, From Scratch</span></h1>
+<p class="intro">A complete walkthrough of every operation inside a GPT-style autoregressive transformer decoder. All computations run live in your browser with no frameworks — just typed arrays and arithmetic. Expand each section to inspect tensor values at every stage.</p>
+<div class="tags">
+  <span class="tag">vocab=64</span><span class="tag">d_model=32</span><span class="tag">heads=4</span>
+  <span class="tag cyan">kv_heads=2 (GQA)</span><span class="tag">d_ff=86</span><span class="tag">layers=2</span>
+  <span class="tag orange">${totalP.toLocaleString()} params</span>
+</div>
+`;
+
+// 0 — Architecture
+root.appendChild(createSection('arch', '0 — Architecture Overview', '🏗️',
+`<div class="code-block">Input Token IDs: [12, 5, 41, 33, 7]
+       |
+       v
+ Token Embedding              (lookup table: 64 × 32)
+       |
+  [× 2 layers]
+  +----+----------------------------------+
+  | RMSNorm                               |
+  | Q, K, V Projections                   |
+  |   Q: (seq, 32) → (seq, 4, 8)         |  4 query heads
+  |   K: (seq, 32) → (seq, 2, 8)         |  2 KV heads (GQA)
+  |   V: (seq, 32) → (seq, 2, 8)         |
+  | RoPE on Q, K                          |
+  | GQA: Expand K,V → 4 heads            |
+  | Scaled Dot-Product Attention          |
+  |   QK^T / √8 + causal mask            |
+  |   Softmax → weighted sum of V         |
+  | Output Projection + Residual          |
+  +----+----------------------------------+
+  | RMSNorm                               |
+  | SwiGLU FFN                            |
+  |   gate = SiLU(x @ W_gate)            |
+  |   up   = x @ W_up                    |
+  |   out  = (gate ⊙ up) @ W_down        |
+  | + Residual                            |
+  +----+----------------------------------+
+       |
+  Final RMSNorm
+  LM Head → (64,) logits
+  Temperature / Top-k / Softmax → Sample</div>`, true));
+
+// 1 — Embedding
+root.appendChild(createSection('emb', '1 — Token Embedding', '📖',
+`<div class="prose">Convert integer token IDs to dense vectors via <strong>table lookup</strong>. Row <span class="tag">i</span> of the embedding matrix becomes the vector for token <span class="tag">i</span>.</div>
+<div class="math-block">x_t = E[token_t] &nbsp;&nbsp; ∈ ℝ^(d_model) &nbsp;&nbsp; where E ∈ ℝ^(V × d_model)</div>
+<div class="output">Input token IDs: [${INPUT_IDS.join(', ')}]
+Embedding matrix: shape=(${C.V}, ${C.D})
+After lookup:     shape=(${SEQ}, ${C.D})
+
+Embedding for token ${INPUT_IDS[0]}:
+  ${fmtArr(embedded.d.slice(0, C.D), 10)}</div>`));
+
+// 2 — RoPE
+root.appendChild(createSection('rope', '2 — Rotary Positional Embeddings (RoPE)', '🌀',
+`<div class="prose">RoPE encodes position by <strong>rotating</strong> pairs of dimensions in Q and K. For dimension pair (2i, 2i+1) at position t, a 2D rotation is applied with angle t·θ_i.</div>
+<div class="math-block">θ_i = 1 / (10000^(2i / d_head)) &nbsp;&nbsp;&nbsp; [q'_even, q'_odd] = Rot(t·θ_i) · [q_even, q_odd]</div>
+<div class="prose">The dot product Q·K then naturally depends only on <strong>relative</strong> position — no learnable parameters needed. This generalizes better to longer sequences than trained position embeddings.</div>
+<div class="output">Dimension pairs: ${C.Dh/2}
+Frequencies (θ_i): ${fmtArr(rope.fr, 4, 6)}
+
+Cos table at position 0: ${fmtArr(rope.cos.d.slice(0,4), 4)}
+Cos table at position 1: ${fmtArr(rope.cos.d.slice(4,8), 4)}
+Cos table at position 3: ${fmtArr(rope.cos.d.slice(12,16), 4)}
+
+Note: position 0 → no rotation (cos=1), increasing positions → more rotation</div>`));
+
+// 3 — RMSNorm
+(() => {
+  const xn = rmsnorm(embedded, params.l0_an);
+  const rmsB = Math.sqrt(Array.from(embedded.d.slice(0,C.D)).reduce((s,v)=>s+v*v,0)/C.D);
+  const rmsA = Math.sqrt(Array.from(xn.d.slice(0,C.D)).reduce((s,v)=>s+v*v,0)/C.D);
+  root.appendChild(createSection('rmsnorm', '3 — RMSNorm (Root Mean Square Normalization)', '📏',
+`<div class="prose">Modern transformers use <strong>RMSNorm</strong> instead of LayerNorm. Simpler: no mean subtraction, no bias — just divide by root-mean-square and scale by a learnable γ.</div>
+<div class="math-block">RMSNorm(x) = (x / RMS(x)) · γ &nbsp;&nbsp; where RMS(x) = √(mean(x²) + ε)</div>
+<div class="output">Before RMSNorm (token 0):
+  RMS = ${rmsB.toFixed(6)}
+  values: ${fmtArr(embedded.d.slice(0, C.D), 8)}
+
+After RMSNorm (token 0):
+  RMS = ${rmsA.toFixed(6)}  (≈ 1.0 since γ = 1)
+  values: ${fmtArr(xn.d.slice(0, C.D), 8)}</div>`));
+})();
+
+// 4 — QKV + GQA
+root.appendChild(createSection('qkv', '4 — Q, K, V Projections + GQA', '🔑',
+`<div class="prose">Three linear projections create Query, Key, and Value tensors. In <strong>Grouped-Query Attention</strong>, K and V have fewer heads (2) than Q (4). Each KV head serves 2 query heads — halving KV-cache memory.</div>
+<div class="math-block">Q = x·W_q ∈ ℝ^(seq, 4, 8) &nbsp;|&nbsp; K = x·W_k ∈ ℝ^(seq, 2, 8) &nbsp;|&nbsp; V = x·W_v ∈ ℝ^(seq, 2, 8)</div>
+<div class="output">Projection weights:
+  W_q: (${C.D}, ${C.H*C.Dh})    → Q has ${C.H} heads
+  W_k: (${C.D}, ${C.KV*C.Dh})   → K has ${C.KV} heads
+  W_v: (${C.D}, ${C.KV*C.Dh})   → V has ${C.KV} heads
+
+GQA expansion: repeat each KV head ${C.H/C.KV}×
+  K: (${SEQ}, 2, 8) → (${SEQ}, 4, 8)
+  V: (${SEQ}, 2, 8) → (${SEQ}, 4, 8)
+
+  KV head 0 serves query heads [0, 1]
+  KV head 1 serves query heads [2, 3]
+
+Multi-Head Attention (MHA):  4 KV heads for 4 Q heads  = 1× memory
+Multi-Query Attention (MQA): 1 KV head  for 4 Q heads  = 0.25× memory
+Grouped-Query (GQA):         2 KV heads for 4 Q heads  = 0.5× memory  ← our config</div>`));
+
+// 5 — Attention (with heatmaps)
+(() => {
+  const frag = document.createElement('div');
+  frag.innerHTML = `
+<div class="prose">The core computation: each position queries all previous positions. The <strong>causal mask</strong> prevents attending to the future.</div>
+<div class="math-block">Attention(Q, K, V) = softmax(QK^T / √d_head + CausalMask) · V</div>
+<div class="prose"><strong>Causal mask</strong> — position i can only attend to positions 0..i:</div>
+<div class="causal-mask">${Array.from({length:SEQ},(_,i)=>
+  '  pos '+i+': ['+Array.from({length:SEQ},(_,j)=>j<=i?'<span class="cm-ok"> ✓ </span>':'<span class="cm-block"> ✗ </span>').join('')+']'
+).join('<br>')}</div>
+<div class="prose" style="margin-top:14px"><strong>Attention weights</strong> after softmax — brighter = higher weight:</div>
+<div class="prose" style="margin-top:10px;font-size:12px;color:var(--text-dim)">Layer 0:</div>
+<div class="heatmap-wrap" id="hm-layer0"></div>
+<div class="prose" style="margin-top:10px;font-size:12px;color:var(--text-dim)">Layer 1 (deeper, more refined patterns):</div>
+<div class="heatmap-wrap" id="hm-layer1"></div>
+<div class="output">Reading the heatmaps:
+  • Row = query position, Column = key position
+  • Each row sums to 1.0 (softmax)
+  • Upper-right triangle is blank (causal mask)
+  • Position 0 always attends 100% to itself (only option)</div>`;
+  const sec = createSection('attn', '5 — Scaled Dot-Product Attention + Causal Mask', '👁️', frag, true);
+  root.appendChild(sec);
+  // Add heatmaps after DOM insertion
+  setTimeout(() => {
+    const hm0 = sec.querySelector('#hm-layer0');
+    const hm1 = sec.querySelector('#hm-layer1');
+    if (hm0) for (let h=0;h<C.H;h++) hm0.appendChild(buildHeatmap(result.layers[0].aW, SEQ, h));
+    if (hm1) for (let h=0;h<C.H;h++) hm1.appendChild(buildHeatmap(result.layers[1].aW, SEQ, h));
+  }, 0);
+})();
+
+// 6 — SwiGLU FFN
+root.appendChild(createSection('ffn', '6 — SwiGLU Feed-Forward Network', '⚡',
+`<div class="prose">After attention, each position passes through a <strong>gated feed-forward network</strong>. SwiGLU uses a learned gate to control which features are activated:</div>
+<div class="math-block">FFN(x) = (SiLU(x·W_gate) ⊙ x·W_up) · W_down</div>
+<div class="prose"><span class="tag">SiLU(x) = x · σ(x)</span> is a smooth, non-monotonic activation. Unlike ReLU, it allows small negative values and has no hard cutoff at zero.</div>
+<div class="output">SiLU activation values:
+  SiLU(-2.0) = ${(-2/(1+Math.exp(2))).toFixed(4)}   (small negative!)
+  SiLU(-1.0) = ${(-1/(1+Math.exp(1))).toFixed(4)}
+  SiLU( 0.0) = ${(0).toFixed(4)}
+  SiLU( 1.0) = ${(1/(1+Math.exp(-1))).toFixed(4)}
+  SiLU( 2.0) = ${(2/(1+Math.exp(-2))).toFixed(4)}
+
+Weight shapes:
+  W_gate: (${C.D}, ${C.Ff})   — gate projection
+  W_up:   (${C.D}, ${C.Ff})   — up projection
+  W_down: (${C.Ff}, ${C.D})   — down projection
+
+  3 matrices instead of 2 → d_ff ≈ (8/3)·d_model to match param count
+  Standard FFN: 2 × d × 4d = 8d²
+  SwiGLU FFN:   3 × d × (8/3)d = 8d²  (same total params)</div>`));
+
+// 7 — Full forward
+root.appendChild(createSection('layers', '7 — Full Forward Pass (Both Layers)', '🔄',
+`<div class="prose">Each layer applies: <span class="tag">RMSNorm → GQA Attention → +Residual → RMSNorm → SwiGLU → +Residual</span></div>
+<div class="output">${result.layers.map((layer,i) =>
+`Layer ${i}:
+  Output norm: ${norm(layer.h).toFixed(4)}
+  Hidden[0, :8]: ${fmtArr(layer.h.d.slice(0,8), 8)}`).join('\n\n')}
+
+After all layers:
+  Final RMSNorm applied
+  Last token hidden state → LM Head projection → logits</div>`));
+
+// 8 — LM Head + Logits
+(() => {
+  const logits = result.logits;
+  const indices = Array.from({length:C.V},(_,i)=>i).sort((a,b)=>logits[b]-logits[a]);
+  const probs = softmax1D(logits);
+  const barHtml = indices.slice(0,20).map(id =>
+    `<div class="bar-row"><span class="bar-label">${id}</span><div class="bar-fill" style="width:${Math.max(probs[id]*600,1)}px"></div><span class="bar-value">${(probs[id]*100).toFixed(1)}%</span></div>`
+  ).join('');
+
+  root.appendChild(createSection('logits', '8 — LM Head: Logits over Vocabulary', '🎯',
+`<div class="prose">The last token's normalized hidden state is projected to a <span class="tag">vocab_size=64</span> logit vector. Each value is the raw score for that token being "next."</div>
+<div class="math-block">logits = RMSNorm(h_last) · W_head &nbsp;&nbsp; ∈ ℝ^(V)</div>
+<div class="output">Logits shape: (${C.V},)
+Range: [${Math.min(...logits).toFixed(4)}, ${Math.max(...logits).toFixed(4)}]
+
+Top 10 next-token candidates:
+${indices.slice(0,10).map((id,rank) =>
+`  #${(rank+1).toString().padStart(2)}  token=${String(id).padStart(2)} | logit=${logits[id].toFixed(4).padStart(8)} | prob=${(probs[id]*100).toFixed(2).padStart(6)}%`
+).join('\n')}</div>
+<div class="prose" style="margin-top:8px">Probability distribution (top 20):</div>
+<div style="margin:8px 0;max-height:280px;overflow-y:auto">${barHtml}</div>`, true));
+})();
+
+// 9 — Sampling
+(() => {
+  const logits = result.logits;
+  const rawProbs = softmax1D(logits);
+  const scaled = Array.from(logits).map(v=>v/0.8);
+  const scaledProbs = softmax1D(scaled);
+  const indices = Array.from({length:C.V},(_,i)=>i).sort((a,b)=>logits[b]-logits[a]);
+
+  root.appendChild(createSection('sampling', '9 — Sampling: Temperature, Top-k, Softmax', '🎲',
+`<div class="prose">Raw logits are transformed into a probability distribution for sampling. <strong>Temperature</strong> controls sharpness, <strong>top-k</strong> truncates to the k most likely tokens.</div>
+<div class="math-block">p_i = exp(z_i / T) / Σ_j exp(z_j / T) &nbsp;&nbsp; (after top-k filtering)</div>
+<div class="output">Temperature=0.8 (sharpens distribution — lower T = more deterministic):
+${indices.slice(0,5).map(id =>
+`  token ${String(id).padStart(2)}: prob ${(rawProbs[id]*100).toFixed(2)}% → ${(scaledProbs[id]*100).toFixed(2)}%`
+).join('\n')}
+
+Top-k=10: keep only 10 highest-prob tokens, set rest to -∞
+  ${C.V} tokens → 10 candidates
+
+Top-p=0.9 (nucleus): keep smallest set with cumulative prob ≥ 90%
+  Adapts k dynamically — fewer candidates when model is confident
+
+Pipeline: logits → ÷temperature → top-k filter → top-p filter → softmax → sample</div>`));
+})();
+
+// 10 — Generation
+(() => {
+  const frag = document.createElement('div');
+  frag.innerHTML = `
+<div class="prose">Feed the model its own output, one token at a time. Each step runs the <strong>full forward pass</strong> on the growing sequence. (A production system uses KV-cache to avoid recomputing past tokens.)</div>
+<div class="code-block">Step 1: model([12, 5, 41, 33, 7])     → predicts next token
+Step 2: model([12, 5, 41, 33, 7, ??])  → predicts next token
+Step 3: model([12, 5, 41, 33, 7, ?, ?]) → ...
+Each step: full embed → N layers → norm → LM head → sample</div>
+<button class="gen-btn" id="gen-btn">▶ Generate 8 Tokens</button>
+<div id="gen-output"></div>`;
+  root.appendChild(createSection('generate', '10 — Autoregressive Generation', '🚀', frag, true));
+
+  document.getElementById('gen-btn').onclick = () => {
+    const gr = seededRng(123);
+    const seq = [...INPUT_IDS];
+    const steps = [];
+    for (let step=0;step<8;step++) {
+      const r = fullForward(seq, params, rope);
+      const {id,pr} = sampleToken(r.logits, 0.8, 10, gr);
+      const topIds = Array.from({length:C.V},(_,i)=>i).sort((a,b)=>r.logits[b]-r.logits[a]).slice(0,5);
+      steps.push({chosen:id, prob:pr[id], topIds, topProbs:topIds.map(i=>pr[i])});
+      seq.push(id);
+    }
+    const out = document.getElementById('gen-output');
+    out.innerHTML = `
+<div class="output">Starting: [${INPUT_IDS.join(', ')}]
+Generating 8 tokens (temperature=0.8, top_k=10)...
+
+${steps.map((s,i) =>
+`Step ${i+1}: chose token ${String(s.chosen).padStart(2)} (p=${(s.prob*100).toFixed(1)}%) | top: ${s.topIds.slice(0,3).map((id,j)=>`${id}=${(s.topProbs[j]*100).toFixed(1)}%`).join(', ')}`
+).join('\n')}
+
+Final: [${seq.join(', ')}]</div>
+<div class="prose" style="margin-top:8px">Sequence tokens (<span style="color:var(--accent)">input</span> / <span style="color:var(--green)">generated</span>):</div>
+<div style="display:flex;flex-wrap:wrap;gap:4px;margin:8px 0">
+${seq.map((tok,i) => `<span class="token-chip ${i<INPUT_IDS.length?'input':'generated'}">${tok}</span>`).join('')}
+</div>`;
+  };
+})();
+
+// 11 — KV-Cache
+root.appendChild(createSection('kvcache', '11 — KV-Cache (Efficient Inference)', '💾',
+`<div class="prose">During generation, K and V for past positions <strong>do not change</strong>. The KV-cache stores them to avoid recomputation:</div>
+<div class="code-block">Step 1: input = [A, B, C]
+  Compute & cache K₀,V₀  K₁,V₁  K₂,V₂
+  Q₂ attends to ALL cached KV
+
+Step 2: input = [D]  ← only the NEW token!
+  Compute K₃,V₃ and APPEND to cache
+  Q₃ attends to cached K₀:₃, V₀:₃
+
+Without cache: O(n²) per step  (recompute everything)
+With cache:    O(n) per step   (only new token)</div>
+<div class="output">KV-Cache memory per layer (this model):
+  K + V: 2 × seq_len × ${C.KV} heads × ${C.Dh} dims × 4 bytes
+  = ${2*C.KV*C.Dh*4} bytes per token per layer
+
+Scaled to LLaMA-7B (d=4096, 32 layers, 32 KV heads, d_head=128):
+  Per token:    ${(2*32*128*4*32/1e6).toFixed(1)} MB per token  (all layers)
+  At seq=4096:  ${(2*32*128*4*32*4096/1e9).toFixed(1)} GB total KV-cache
+  At seq=128K:  ${(2*32*128*4*32*131072/1e9).toFixed(1)} GB total KV-cache
+
+This is why GQA matters — with 8 KV heads instead of 32:
+  At seq=4096:  ${(2*8*128*4*32*4096/1e9).toFixed(1)} GB  (4× reduction!)</div>`));
+
+// 12 — FLOPs
+(() => {
+  const S=SEQ, D=C.D, H=C.H, KV=C.KV, Dh=C.Dh, F=C.Ff;
+  const qkv=S*D*(H+2*KV)*Dh*2, as=H*S*S*Dh*2, av=H*S*S*Dh*2;
+  const op=S*H*Dh*D*2, ffn=S*(2*D*F+F*D)*2;
+  const layer=qkv+as+av+op+ffn, total=layer*C.L+D*C.V*2;
+  root.appendChild(createSection('flops', '12 — Computation & Memory Summary', '📊',
+`<div class="output">FLOPs per layer (seq_len=${S}):
+  QKV Projections:      ${qkv.toLocaleString().padStart(10)}
+  Attention (QK^T):     ${as.toLocaleString().padStart(10)}
+  Attention (× V):      ${av.toLocaleString().padStart(10)}
+  Output Projection:    ${op.toLocaleString().padStart(10)}
+  SwiGLU FFN:           ${ffn.toLocaleString().padStart(10)}
+  ─────────────────────────────────────
+  Per layer:            ${layer.toLocaleString().padStart(10)}
+  × ${C.L} layers:            ${(layer*C.L).toLocaleString().padStart(10)}
+  + LM Head:            ${(D*C.V*2).toLocaleString().padStart(10)}
+  ═══════════════════════════════════════
+  TOTAL:                ${total.toLocaleString().padStart(10)} FLOPs
+
+Key scaling insight:
+  Attention: O(n² · d)  — quadratic in sequence length
+  FFN:       O(n · d²)  — quadratic in model dimension
+
+  Short sequences → FFN dominates
+  Long sequences  → Attention dominates
+  Crossover point ≈ when seq_len ≈ d_model</div>`));
+})();
+
+// 13 — Summary
+(() => {
+  const takeaways = [
+    ['Everything is matmuls', 'Linear projections and dot products — GPUs are optimized for exactly this.', '--accent'],
+    ['RoPE encodes position via rotation', 'Q·K dot products naturally depend on relative position. No learnable parameters.', '--cyan'],
+    ['GQA halves KV-cache memory', 'Multiple query heads share K,V heads. Same quality, half the memory at inference.', '--green'],
+    ['SwiGLU > ReLU', 'Learned gating selects which features to activate. 3 matrices, better expressivity.', '--orange'],
+    ['RMSNorm is the new standard', 'Simpler than LayerNorm (no mean, no bias), equivalent quality.', '--purple'],
+    ['KV-cache is essential', 'Without it, generation cost is O(n²) per token. With it, O(n).', '--red'],
+    ['Causal mask = decoder', 'Each position only sees the past — this is what makes it autoregressive.', '--text-bright'],
+  ];
+  root.appendChild(createSection('summary', '13 — Summary & Key Takeaways', '🎓',
+`<div>${takeaways.map(([t,d,c],i) =>
+`<div class="takeaway" style="background:rgba(${c==='--accent'?'88,166,255':c==='--cyan'?'57,210,192':c==='--green'?'63,185,80':c==='--orange'?'210,153,34':c==='--purple'?'188,140,255':c==='--red'?'248,81,73':'230,237,243'},0.04);border:1px solid rgba(${c==='--accent'?'88,166,255':c==='--cyan'?'57,210,192':c==='--green'?'63,185,80':c==='--orange'?'210,153,34':c==='--purple'?'188,140,255':c==='--red'?'248,81,73':'230,237,243'},0.13)">
+  <span class="takeaway-num" style="color:var(${c})">${i+1}.</span>
+  <div><div class="takeaway-title" style="color:var(${c})">${t}</div><div class="takeaway-desc">${d}</div></div>
+</div>`).join('')}</div>
+<div class="footer">Built with typed arrays. No frameworks, no magic — just math.</div>`, true));
+})();
+</script>
+</body>
+</html>
