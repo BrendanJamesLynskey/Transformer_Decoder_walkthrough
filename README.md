@@ -65,10 +65,6 @@ python3 -m http.server 8000
 # Visit http://localhost:8000
 ```
 
-## UID
-
-`770c9c6` — repository HEAD at time of writing.
-
 ## Built With
 
 - Vanilla JavaScript (ES6+)
